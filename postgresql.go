@@ -15,9 +15,17 @@ type postgresqlResource struct {
 }
 
 func (r *postgresqlResource) Await(ctx context.Context) error {
+	tags := parseTags(r.URL.Fragment)
+
+	dbParams := url.Values{}
+
+	if val, ok := tags["ssl"]; ok && val == "false" {
+		dbParams.Set("sslmode", "disable") // PGSSLMODE
+	}
+
 	dsnURL := r.URL
-	tags := parseTags(dsnURL.Fragment)
 	dsnURL.Fragment = ""
+	dsnURL.RawQuery = dbParams.Encode()
 	dsn := dsnURL.String()
 
 	db, err := sql.Open(r.URL.Scheme, dsn)
