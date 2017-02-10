@@ -22,6 +22,8 @@ package main
 
 import (
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -33,7 +35,11 @@ type httpResource struct {
 }
 
 func (r *httpResource) Await(ctx context.Context) error {
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
 
 	// IDEA(uwe): Use fragment to set method
 
@@ -45,6 +51,7 @@ func (r *httpResource) Await(ctx context.Context) error {
 	// IDEA(uwe): Use k/v pairs in fragment to set headers
 
 	req = req.WithContext(ctx)
+	req.Close = true
 
 	req.Header.Set("User-Agent", "await/"+version)
 
@@ -56,9 +63,13 @@ func (r *httpResource) Await(ctx context.Context) error {
 
 	// IDEA(uwe): Use fragment to set tolerated status code
 
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		return nil
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return &unavailabilityError{errors.New(resp.Status)}
 	}
 
-	return &unavailabilityError{errors.New(resp.Status)}
+	if _, err := io.Copy(ioutil.Discard, resp.Body); err != nil {
+		return &unavailabilityError{err}
+	}
+
+	return nil
 }
