@@ -23,6 +23,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 )
 
 type resource interface {
@@ -42,9 +43,11 @@ func (e *unavailabilityError) Error() string {
 func parseResources(urlArgs []string) ([]resource, error) {
 	var resources []resource
 	for _, urlArg := range urlArgs {
+		expandedUrl := os.ExpandEnv(urlArg)
+
 		// Leveraging the fact the Go's URL parser matches e.g. `curl -s
 		// http://example.com` as url.Path instead of throwing an error.
-		u, err := url.Parse(urlArg)
+		u, err := url.Parse(expandedUrl)
 		if err != nil {
 			return nil, err
 		}

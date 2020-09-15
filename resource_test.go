@@ -20,7 +20,10 @@
 
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestParseResourcesSuccess(t *testing.T) {
 	ress := []string{
@@ -66,6 +69,30 @@ func TestParseResourcesFailure(t *testing.T) {
 	_, err := parseResources([]string{"//foo test"})
 	if err == nil {
 		t.Errorf("expected error parsing invalid ressource")
+	}
+}
+
+func TestParseResourcesOsEnvSubstitution(t *testing.T) {
+	if os.Setenv("USER", "username") != nil {
+		t.Fatalf("Unable to set up environment for testing")
+	}
+	if os.Setenv("PASS", "password") != nil {
+		t.Fatalf("Unable to set up environment for testing")
+	}
+	if os.Setenv("HOST", "hostname") != nil {
+		t.Fatalf("Unable to set up environment for testing")
+	}
+	ress, err := parseResources([]string{"http://$USER:$PASS@${HOST}:1234/path?query=val#fragment"})
+	if err != nil {
+		t.Fatalf("failed to parse resource")
+	}
+	httpResource, ok := ress[0].(*httpResource)
+	if !ok {
+		t.Fatalf("unexpected resource type after parsing")
+	}
+	expected := "http://username:password@hostname:1234/path?query=val#fragment"
+	if httpResource.URL.String() != expected {
+		t.Errorf("unexpected environment expansion: expected: '%v', got: '%v'", expected, httpResource.URL.String())
 	}
 }
 
