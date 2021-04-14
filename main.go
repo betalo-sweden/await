@@ -38,7 +38,7 @@ func main() {
 		forceFlag    = flag.Bool("f", false, "Force running the command even after giving up")
 		infileFlag   = flag.String("i", "", "Read resources from file, '-' to read from stdin")
 		quietFlag    = flag.Bool("q", false, "Set quiet mode")
-		timeoutFlag  = flag.Duration("t", 1*time.Minute, "Set timeout duration before giving up")
+		timeoutFlag  = flag.Duration("t", 2*time.Minute, "Set timeout duration before giving up")
 		verbose1Flag = flag.Bool("v", false, "Set verbose output mode")
 		verbose2Flag = flag.Bool("vv", false, "Set more verbose output mode")
 		versionFlag  = flag.Bool("V", false, "Show version")
