@@ -157,6 +157,11 @@ classified as available as soon as the database was found.
   value present, the resource's database scheme must at least contain the
   specified tables. Using this key requires to provide a database name.
 
+### AMQP resource
+
+**Availability**: Available when a connection to the given AMQP server is established. Unavailable otherwise.
+
+**URL syntax**: `amqp[s]://[<user>[:<pass>]@]<host>[:<port>]/[<vhost>]`
 
 ### Command Resource
 
